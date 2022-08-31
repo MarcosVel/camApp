@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  Image,
   Modal,
   StatusBar,
   StyleSheet,
@@ -12,9 +13,15 @@ import {RNCamera} from 'react-native-camera';
 export default function App() {
   const [type, setType] = useState(RNCamera.Constants.Type.back);
   const [open, setOpen] = useState(false);
+  const [capturePhoto, setCapturePhoto] = useState(null);
 
-  const takePicture = () => {
+  const takePicture = async camera => {
+    const options = {quality: 0.5, base64: true};
+    const data = await camera.takePictureAsync(options);
+
+    setCapturePhoto(data.uri);
     setOpen(true);
+    console.log('foto', data.uri);
   };
 
   return (
@@ -36,7 +43,9 @@ export default function App() {
           }
           return (
             <View style={styles.buttons}>
-              <TouchableOpacity onPress={takePicture} style={styles.capture}>
+              <TouchableOpacity
+                onPress={() => takePicture(camera)}
+                style={styles.capture}>
                 <Text>Tirar foto</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => {}} style={styles.capture}>
@@ -47,13 +56,21 @@ export default function App() {
         }}
       </RNCamera>
 
-      <Modal animationType="slide" transparent={false} visible={open}>
-        <View style={styles.modalView}>
-          <TouchableOpacity onPress={() => setOpen(false)}>
-            <Text>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
+      {capturePhoto && (
+        <Modal animationType="slide" transparent={false} visible={open}>
+          <View style={styles.modalView}>
+            <TouchableOpacity onPress={() => setOpen(false)}>
+              <Text>Fechar</Text>
+            </TouchableOpacity>
+
+            <Image
+              style={styles.photo}
+              source={{uri: capturePhoto}}
+              resizeMode="contain"
+            />
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -88,5 +105,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     margin: 20,
+  },
+  photo: {
+    width: 350,
+    height: 450,
+    borderRadius: 16,
   },
 });
