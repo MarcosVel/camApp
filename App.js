@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import {RNCamera} from 'react-native-camera';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function App() {
   const [type, setType] = useState(RNCamera.Constants.Type.back);
@@ -22,6 +23,14 @@ export default function App() {
     setCapturePhoto(data.uri);
     setOpen(true);
     console.log('foto', data.uri);
+  };
+
+  const invertCam = () => {
+    setType(
+      type === RNCamera.Constants.Type.back
+        ? RNCamera.Constants.Type.front
+        : RNCamera.Constants.Type.back,
+    );
   };
 
   return (
@@ -43,13 +52,19 @@ export default function App() {
           }
           return (
             <View style={styles.buttons}>
+              <TouchableOpacity onPress={() => {}} style={styles.album}>
+                <Image
+                  style={styles.photoAlbum}
+                  source={{uri: capturePhoto}}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => takePicture(camera)}
-                style={styles.capture}>
-                <Text>Tirar foto</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => {}} style={styles.capture}>
-                <Text>Album</Text>
+                style={styles.capture}
+              />
+              <TouchableOpacity onPress={invertCam} style={styles.invert}>
+                <Icon name="camera-reverse-outline" size={20} color="#e2e2e2" />
               </TouchableOpacity>
             </View>
           );
@@ -86,19 +101,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttons: {
-    marginBottom: 35,
+    width: '100%',
+    marginBottom: 24,
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 40,
   },
   capture: {
-    flex: 0,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 15,
-    paddingHorizontal: 20,
-    alignSelf: 'center',
-    marginHorizontal: 20,
+    width: 60,
+    height: 60,
+    backgroundColor: '#e2e2e2',
+    borderColor: '#fff',
+    borderRadius: 100,
+    borderWidth: 5,
+  },
+  album: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#2b2b2b',
+    borderColor: '#e2e2e2',
+    borderRadius: 8,
+    borderWidth: 3,
+  },
+  photoAlbum: {
+    flex: 1,
+  },
+  invert: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2b2b2b',
+    borderColor: '#e2e2e2',
+    borderRadius: 100,
+    borderWidth: 3,
   },
   modalView: {
     flex: 1,
