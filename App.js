@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  Modal,
   StatusBar,
   StyleSheet,
   Text,
@@ -10,6 +11,11 @@ import {RNCamera} from 'react-native-camera';
 
 export default function App() {
   const [type, setType] = useState(RNCamera.Constants.Type.back);
+  const [open, setOpen] = useState(false);
+
+  const takePicture = () => {
+    setOpen(true);
+  };
 
   return (
     <View style={styles.container}>
@@ -30,7 +36,7 @@ export default function App() {
           }
           return (
             <View style={styles.buttons}>
-              <TouchableOpacity onPress={() => {}} style={styles.capture}>
+              <TouchableOpacity onPress={takePicture} style={styles.capture}>
                 <Text>Tirar foto</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => {}} style={styles.capture}>
@@ -40,6 +46,14 @@ export default function App() {
           );
         }}
       </RNCamera>
+
+      <Modal animationType="slide" transparent={false} visible={open}>
+        <View style={styles.modalView}>
+          <TouchableOpacity onPress={() => setOpen(false)}>
+            <Text>Fechar</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -68,5 +82,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignSelf: 'center',
     marginHorizontal: 20,
+  },
+  modalView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 20,
   },
 });
