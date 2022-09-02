@@ -2,6 +2,9 @@ import React, {useState} from 'react';
 import {
   Image,
   Modal,
+  PermissionsAndroid,
+  Platform,
+  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
@@ -10,6 +13,7 @@ import {
 } from 'react-native';
 import {RNCamera} from 'react-native-camera';
 import Icon from 'react-native-vector-icons/Ionicons';
+import CameraRoll from '@react-native-community/cameraroll';
 
 export default function App() {
   const [type, setType] = useState(RNCamera.Constants.Type.back);
@@ -22,7 +26,8 @@ export default function App() {
 
     setCapturePhoto(data.uri);
     setOpen(true);
-    console.log('foto', data.uri);
+
+    savePicture(data.uri);
   };
 
   const invertCam = () => {
@@ -33,8 +38,36 @@ export default function App() {
     );
   };
 
+  async function hasAndroidPermission() {
+    const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+
+    const hasPermission = await PermissionsAndroid.check(permission);
+
+    if (hasPermission) {
+      return true;
+    }
+
+    const status = await PermissionsAndroid.request(permission);
+    return status === 'granted';
+  }
+
+  async function savePicture(data) {
+    if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
+      return;
+    }
+
+    CameraRoll.save(data, 'photo')
+      .then(res => {
+        console.log('SALVO COM SUCESSO', res);
+      })
+      .catch(err => {
+        console.log('ERRO:', err);
+        throw err;
+      });
+  }
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar hidden={true} />
       <RNCamera
         style={styles.preview}
@@ -86,7 +119,7 @@ export default function App() {
           </View>
         </Modal>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -126,6 +159,7 @@ const styles = StyleSheet.create({
   },
   photoAlbum: {
     flex: 1,
+    borderRadius: 8,
   },
   invert: {
     width: 40,
