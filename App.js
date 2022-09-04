@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   Modal,
@@ -14,16 +14,25 @@ import {
 import {RNCamera} from 'react-native-camera';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CameraRoll from '@react-native-community/cameraroll';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 export default function App() {
   const [type, setType] = useState(RNCamera.Constants.Type.back);
   const [open, setOpen] = useState(false);
   const [capturePhoto, setCapturePhoto] = useState(null);
+  const [lastImage, setLastImage] = useState(null);
+
+  useEffect(() => {
+    CameraRoll.getPhotos({first: 1}).then(res =>
+      setLastImage(res.edges[0].node.image.uri),
+    );
+  }, []);
 
   const takePicture = async camera => {
     const options = {quality: 0.5, base64: true};
     const data = await camera.takePictureAsync(options);
 
+    setLastImage(data.uri);
     setCapturePhoto(data.uri);
     setOpen(true);
 
@@ -66,6 +75,24 @@ export default function App() {
       });
   }
 
+  const openAlbum = () => {
+    const options = {
+      noData: true,
+      mediaType: 'photo',
+    };
+
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('picker closed');
+      } else if (response.errorMessage) {
+        console.log('Error', response.errorMessage);
+      } else {
+        setCapturePhoto(response.uri);
+        setOpen(true);
+      }
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar hidden={true} />
@@ -85,10 +112,10 @@ export default function App() {
           }
           return (
             <View style={styles.buttons}>
-              <TouchableOpacity onPress={() => {}} style={styles.album}>
+              <TouchableOpacity onPress={openAlbum} style={styles.album}>
                 <Image
                   style={styles.photoAlbum}
-                  source={{uri: capturePhoto}}
+                  source={{uri: lastImage}}
                   resizeMode="cover"
                 />
               </TouchableOpacity>
