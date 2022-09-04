@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   Modal,
@@ -20,11 +20,19 @@ export default function App() {
   const [type, setType] = useState(RNCamera.Constants.Type.back);
   const [open, setOpen] = useState(false);
   const [capturePhoto, setCapturePhoto] = useState(null);
+  const [lastImage, setLastImage] = useState(null);
+
+  useEffect(() => {
+    CameraRoll.getPhotos({first: 1}).then(res =>
+      setLastImage(res.edges[0].node.image.uri),
+    );
+  }, []);
 
   const takePicture = async camera => {
     const options = {quality: 0.5, base64: true};
     const data = await camera.takePictureAsync(options);
 
+    setLastImage(data.uri);
     setCapturePhoto(data.uri);
     setOpen(true);
 
@@ -107,7 +115,7 @@ export default function App() {
               <TouchableOpacity onPress={openAlbum} style={styles.album}>
                 <Image
                   style={styles.photoAlbum}
-                  source={{uri: capturePhoto}}
+                  source={{uri: lastImage}}
                   resizeMode="cover"
                 />
               </TouchableOpacity>
